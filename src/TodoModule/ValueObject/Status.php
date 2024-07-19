@@ -6,5 +6,5 @@ namespace App\TodoModule\ValueObject;
 
 use App\ValueObject\AbstractString;
 
-readonly class Author extends AbstractString {
+readonly class Status extends AbstractString {
 }

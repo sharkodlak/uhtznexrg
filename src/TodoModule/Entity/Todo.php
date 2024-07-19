@@ -4,6 +4,10 @@ declare(strict_types = 1);
 
 namespace App\TodoModule\Entity;
 
+use App\TodoModule\ValueObject\Description;
+use App\TodoModule\ValueObject\Status;
+use App\TodoModule\ValueObject\Title;
+use App\TodoModule\ValueObject\TodoId;
 use JsonSerializable;
 
 readonly class Todo implements JsonSerializable {
@@ -11,7 +15,7 @@ readonly class Todo implements JsonSerializable {
 		private TodoId $id,
 		private Title $title,
 		private Description $description,
-		private Status $status,
+		private Status $status
 	) {
 	}
 

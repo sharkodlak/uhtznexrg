@@ -13,6 +13,9 @@ readonly class Config {
 
 	private string $dbName;
 
+	/**
+	 * @param array<string, string> $envs
+	 */
 	public function __construct(array $envs) {
 		$this->dbHost = $envs['DB_HOST'];
 		$this->dbUser = $envs['DB_USER'];

@@ -7,7 +7,6 @@ namespace App\TodoModule\Repository;
 use App\TodoModule\Dto\CreateTodoDto;
 use App\TodoModule\Dto\UpdateTodoDto;
 use App\TodoModule\Entity\Todo;
-use App\TodoModule\ValueObject\Author;
 use App\TodoModule\ValueObject\TodoId;
 
 interface TodoRepository {
@@ -16,11 +15,6 @@ interface TodoRepository {
 	public function delete(TodoId $id): void;
 
 	public function find(TodoId $id): ?Todo;
-
-	/**
-	 * @return array<Todo>
-	 */
-	public function listByAuthor(Author $author): array;
 
 	/**
 	 * @return array<Todo>

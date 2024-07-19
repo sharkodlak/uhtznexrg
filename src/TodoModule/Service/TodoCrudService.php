@@ -13,36 +13,36 @@ use App\TodoModule\ValueObject\TodoId;
 
 class TodoCrudService {
 	public function __construct(
-		private readonly TodoRepository $TodoRepository
+		private readonly TodoRepository $todoRepository
 	) {
 	}
 
 	public function createTodo(CreateTodoDto $newTodoDto): Todo {
-		return $this->TodoRepository->create($newTodoDto);
+		return $this->todoRepository->create($newTodoDto);
 	}
 
 	public function deleteTodo(TodoId $id): void {
-		$this->TodoRepository->delete($id);
+		$this->todoRepository->delete($id);
 	}
 
 	public function getTodo(TodoId $id): Todo {
-		$Todo = $this->TodoRepository->find($id);
+		$todo = $this->todoRepository->find($id);
 
-		if ($Todo === null) {
+		if ($todo === null) {
 			throw TodoNotFound::create();
 		}
 
-		return $Todo;
+		return $todo;
 	}
 
 	/**
 	 * @return array<Todo>
 	 */
 	public function getTodos(): array {
-		return $this->TodoRepository->findAll();
+		return $this->todoRepository->findAll();
 	}
 
 	public function updateTodo(TodoId $id, UpdateTodoDto $updateTodoDto): Todo {
-		return $this->TodoRepository->update($id, $updateTodoDto);
+		return $this->todoRepository->update($id, $updateTodoDto);
 	}
 }

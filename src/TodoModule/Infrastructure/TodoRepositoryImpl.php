@@ -7,30 +7,27 @@ namespace App\TodoModule\Infrastructure;
 use App\TodoModule\Dto\CreateTodoDto;
 use App\TodoModule\Dto\UpdateTodoDto;
 use App\TodoModule\Entity\Todo;
-use App\TodoModule\Exceptions\TodoAlreadyExists;
 use App\TodoModule\Exceptions\TodoCreateException;
 use App\TodoModule\Exceptions\TodoRuntimeException;
 use App\TodoModule\Repository\TodoRepository;
-use App\TodoModule\ValueObject\Author;
-use App\TodoModule\ValueObject\TodoId;
 use App\TodoModule\ValueObject\Description;
-use App\TodoModule\ValueObject\Genre;
-use App\TodoModule\ValueObject\Price;
-use App\TodoModule\ValueObject\PublishDate;
+use App\TodoModule\ValueObject\Status;
 use App\TodoModule\ValueObject\Title;
+use App\TodoModule\ValueObject\TodoId;
 use PDO;
 use PDOStatement;
 
 readonly class TodoRepositoryImpl implements TodoRepository {
-	private const SELECT_FROM = 'SELECT todo_id, author, title, genre, description, price, publish_date FROM todos';
+	private const INSERT = 'INSERT INTO todos (title, description, status)
+		VALUES (:title, :description, :status)
+		RETURNING todo_id';
+	private const SELECT = 'SELECT todo_id, title, description, status FROM todos';
 	private const UPDATE = 'UPDATE todos
-		SET author = :author,
-			title = :title,
-			genre = :genre,
+		SET title = :title,
 			description = :description,
-			price = :price,
-			publish_date = :publish_date
+			status = :status
 		WHERE todo_id = :id';
+	private const DELETE = 'DELETE FROM todos WHERE todo_id = :id';
 
 	public function __construct(
 		private PDO $pdo
@@ -38,21 +35,18 @@ readonly class TodoRepositoryImpl implements TodoRepository {
 	}
 
 	public function create(CreateTodoDto $newTodoDto): Todo {
-		$todoId = new TodoId($newTodoDto->getId());
-		$todo = $this->find($todoId);
+		$stmt = $this->pdo->prepare(self::INSERT);
+		$stmt->execute($newTodoDto->toArray());
+		$todoId = $stmt->fetchColumn();
 
-		if ($todo !== null) {
-			throw TodoAlreadyExists::create('Todo already exists');
+		if ($todoId === false || $stmt->rowCount() === 0) {
+			throw TodoCreateException::create('Could not create todo');
 		}
 
-		$todo = $this->getTodoInstanceFromDto($newTodoDto);
-		$stmt = $this->pdo->prepare(
-			"INSERT INTO todos (todo_id, author, title, genre, description, price, publish_date)\n"
-			. 'VALUES (:id, :author, :title, :genre, :description, :price, :publish_date)'
-		);
-		$stmt->execute($todo->toArray());
+		$todoIdVO = new TodoId((int) $todoId);
+		$todo = $this->find($todoIdVO);
 
-		if ($stmt->rowCount() === 0) {
+		if ($todo === null) {
 			throw TodoCreateException::create('Could not create todo');
 		}
 
@@ -60,32 +54,22 @@ readonly class TodoRepositoryImpl implements TodoRepository {
 	}
 
 	public function delete(TodoId $id): void {
-		$stmt = $this->pdo->prepare('DELETE FROM todos WHERE todo_id = :id');
+		$stmt = $this->pdo->prepare(self::DELETE);
 		$stmt->execute(['id' => $id->getValue()]);
 	}
 
 	public function find(TodoId $id): ?Todo {
-		$stmt = $this->pdo->prepare(self::SELECT_FROM . ' WHERE todo_id = :id');
+		$stmt = $this->pdo->prepare(self::SELECT . ' WHERE todo_id = :id');
 		$stmt->execute(['id' => $id->getValue()]);
+
 		return $this->fetch($stmt);
 	}
 
 	/**
 	 * @return array<Todo>
 	 */
-	public function listByAuthor(Author $author): array {
-		$stmt = $this->pdo->prepare(self::SELECT_FROM . ' WHERE author = :author');
-		$stmt->execute(['author' => $author->getValue()]);
-		$todos = $stmt->fetchAll(PDO::FETCH_FUNC, fn (...$args) => $this->getTodoInstance(...$args));
-
-		return $todos;
-	}
-
-	/**
-	 * @return array<Todo>
-	 */
 	public function findAll(): array {
-		$stmt = $this->pdo->query(self::SELECT_FROM);
+		$stmt = $this->pdo->query(self::SELECT);
 
 		if ($stmt === false) {
 			throw new TodoRuntimeException('Failed to fetch todos');
@@ -104,12 +88,9 @@ readonly class TodoRepositoryImpl implements TodoRepository {
 
 		return $this->getTodoInstance(
 			$id->getValue(),
-			$updateTodoDto->getAuthor(),
 			$updateTodoDto->getTitle(),
-			$updateTodoDto->getGenre(),
 			$updateTodoDto->getDescription(),
-			$updateTodoDto->getPrice(),
-			$updateTodoDto->getPublishDate()
+			$updateTodoDto->getStatus()
 		);
 	}
 
@@ -121,46 +102,20 @@ readonly class TodoRepositoryImpl implements TodoRepository {
 			return null;
 		}
 
-		return $this->getTodoInstance(
-			$row['todo_id'],
-			$row['author'],
-			$row['title'],
-			$row['genre'],
-			$row['description'],
-			$row['price'],
-			$row['publish_date']
-		);
-	}
-
-	private function getTodoInstanceFromDto(CreateTodoDto $newTodoDto): Todo {
-		return $this->getTodoInstance(
-			$newTodoDto->getId(),
-			$newTodoDto->getAuthor(),
-			$newTodoDto->getTitle(),
-			$newTodoDto->getGenre(),
-			$newTodoDto->getDescription(),
-			$newTodoDto->getPrice(),
-			$newTodoDto->getPublishDate()
-		);
+		return $this->getTodoInstance($row['todo_id'], $row['title'], $row['description'], $row['status']);
 	}
 
 	private function getTodoInstance(
-		string $todoId,
-		string $author,
+		int $todoId,
 		string $title,
-		string $genre,
 		string $description,
-		string|float $price,
-		string $publishDate
+		string $status
 	): Todo {
 		$todoIdVO = new TodoId($todoId);
-		$authorVO = new Author($author);
 		$titleVO = new Title($title);
-		$genreVO = new Genre($genre);
 		$descriptionVO = new Description($description);
-		$priceVO = new Price((float) $price); // phpcs:ignore Generic.Formatting.SpaceBeforeCast.NoSpace
-		$publishDateVO = new PublishDate($publishDate);
+		$statusVO = new Status($status);
 
-		return new Todo($todoIdVO, $authorVO, $titleVO, $genreVO, $descriptionVO, $priceVO, $publishDateVO);
+		return new Todo($todoIdVO, $titleVO, $descriptionVO, $statusVO);
 	}
 }

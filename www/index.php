@@ -6,8 +6,8 @@ require __DIR__ . '/../vendor/autoload.php';
 
 use App\Bootstrap;
 
-$configurator = Bootstrap::boot();
-$container = $configurator->createContainer();
-$application = $container->getService('application');
+$bootstrap = new Bootstrap();
+$configurator = $bootstrap->boot();
+$application = $bootstrap->createApplication();
 
 $application->run();

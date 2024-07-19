@@ -2,47 +2,47 @@
 
 declare(strict_types = 1);
 
-namespace App\BookModule\Service;
+namespace App\TodoModule\Service;
 
-use App\BookModule\Dto\CreateBookDto;
-use App\BookModule\Dto\UpdateBookDto;
-use App\BookModule\Entity\Book;
-use App\BookModule\Exceptions\BookNotFound;
-use App\BookModule\Repository\BookRepository;
-use App\BookModule\ValueObject\BookId;
+use App\TodoModule\Dto\CreateTodoDto;
+use App\TodoModule\Dto\UpdateTodoDto;
+use App\TodoModule\Entity\Todo;
+use App\TodoModule\Exceptions\TodoNotFound;
+use App\TodoModule\Repository\TodoRepository;
+use App\TodoModule\ValueObject\TodoId;
 
-class BookCrudService {
+class TodoCrudService {
 	public function __construct(
-		private readonly BookRepository $bookRepository
+		private readonly TodoRepository $TodoRepository
 	) {
 	}
 
-	public function createBook(CreateBookDto $newBookDto): Book {
-		return $this->bookRepository->create($newBookDto);
+	public function createTodo(CreateTodoDto $newTodoDto): Todo {
+		return $this->TodoRepository->create($newTodoDto);
 	}
 
-	public function deleteBook(BookId $id): void {
-		$this->bookRepository->delete($id);
+	public function deleteTodo(TodoId $id): void {
+		$this->TodoRepository->delete($id);
 	}
 
-	public function getBook(BookId $id): Book {
-		$book = $this->bookRepository->find($id);
+	public function getTodo(TodoId $id): Todo {
+		$Todo = $this->TodoRepository->find($id);
 
-		if ($book === null) {
-			throw BookNotFound::create();
+		if ($Todo === null) {
+			throw TodoNotFound::create();
 		}
 
-		return $book;
+		return $Todo;
 	}
 
 	/**
-	 * @return array<Book>
+	 * @return array<Todo>
 	 */
-	public function getBooks(): array {
-		return $this->bookRepository->findAll();
+	public function getTodos(): array {
+		return $this->TodoRepository->findAll();
 	}
 
-	public function updateBook(BookId $id, UpdateBookDto $updateBookDto): Book {
-		return $this->bookRepository->update($id, $updateBookDto);
+	public function updateTodo(TodoId $id, UpdateTodoDto $updateTodoDto): Todo {
+		return $this->TodoRepository->update($id, $updateTodoDto);
 	}
 }

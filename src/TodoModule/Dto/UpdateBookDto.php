@@ -2,11 +2,11 @@
 
 declare(strict_types = 1);
 
-namespace App\BookModule\Dto;
+namespace App\TodoModule\Dto;
 
 use JsonSerializable;
 
-readonly class UpdateBookDto implements JsonSerializable {
+readonly class UpdateTodoDto implements JsonSerializable {
 	public function __construct(
 		private string $author,
 		private string $title,

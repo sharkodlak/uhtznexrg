@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-namespace App\BookModule\ValueObject;
+namespace App\TodoModule\ValueObject;
 
 use DateTimeImmutable;
 use DateTimeInterface;

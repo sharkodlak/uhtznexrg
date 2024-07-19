@@ -2,9 +2,9 @@
 
 declare(strict_types = 1);
 
-namespace App\BookModule\ValueObject;
+namespace App\TodoModule\ValueObject;
 
 use App\ValueObject\AbstractString;
 
-readonly class BookId extends AbstractString {
+readonly class TodoId extends AbstractString {
 }

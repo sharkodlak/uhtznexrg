@@ -4,17 +4,17 @@ declare(strict_types = 1);
 
 namespace App\UI\API;
 
-use App\BookModule\Dto\CreateBookDto;
-use App\BookModule\Dto\UpdateBookDto;
-use App\BookModule\Service\BookCrudService;
-use App\BookModule\ValueObject\BookId;
+use App\TodoModule\Dto\CreateTodoDto;
+use App\TodoModule\Dto\UpdateTodoDto;
+use App\TodoModule\Service\TodoCrudService;
+use App\TodoModule\ValueObject\TodoId;
 use Nette\Application\Responses\TextResponse;
 use Nette\Application\UI\Presenter;
 use Nette\Http\IResponse;
 
-class BooksPresenter extends Presenter {
+class TodosPresenter extends Presenter {
 	public function __construct(
-		private BookCrudService $bookCrudService
+		private TodoCrudService $todoCrudService
 	) {
 		parent::__construct();
 	}
@@ -27,11 +27,11 @@ class BooksPresenter extends Presenter {
 
 		// Map methods to actions.
 		$allowedMethods = [
-			'getBooks' => 'GET',
-			'createBook' => 'POST',
-			'readBook' => 'GET',
-			'updateBook' => 'PUT',
-			'deleteBook' => 'DELETE',
+			'getTodos' => 'GET',
+			'createTodo' => 'POST',
+			'readTodo' => 'GET',
+			'updateTodo' => 'PUT',
+			'deleteTodo' => 'DELETE',
 		];
 
 		if (!isset($allowedMethods[$action]) || $method === $allowedMethods[$action]) {
@@ -41,38 +41,38 @@ class BooksPresenter extends Presenter {
 		$this->error('Method Not Allowed', IResponse::S405_MethodNotAllowed);
 	}
 
-	public function actionBooks(): void {
+	public function actionTodos(): void {
 		$httpMethod = $this->getHttpRequest()->getMethod();
 
 		match ($httpMethod) {
-			'GET' => $this->actionGetBooks(),
-			'POST' => $this->actionCreateBook(),
+			'GET' => $this->actionGetTodos(),
+			'POST' => $this->actionCreateTodo(),
 			default => $this->error('Method Not Allowed', IResponse::S405_MethodNotAllowed),
 		};
 	}
 
-	public function actionGetBooks(): void {
-		$books = $this->bookCrudService->getBooks();
-		$this->sendJson($books);
+	public function actionGetTodos(): void {
+		$todos = $this->todoCrudService->getTodos();
+		$this->sendJson($todos);
 	}
 
-	public function actionBook(string $bookId): void {
+	public function actionTodo(string $todoId): void {
 		$httpMethod = $this->getHttpRequest()->getMethod();
 
 		match ($httpMethod) {
-			'GET' => $this->actionReadBook($bookId),
-			'PUT' => $this->actionUpdateBook($bookId),
-			'DELETE' => $this->actionDeleteBook($bookId),
+			'GET' => $this->actionReadTodo($todoId),
+			'PUT' => $this->actionUpdateTodo($todoId),
+			'DELETE' => $this->actionDeleteTodo($todoId),
 			default => $this->error('Method Not Allowed', IResponse::S405_MethodNotAllowed),
 		};
 	}
 
-	public function actionCreateBook(): void {
+	public function actionCreateTodo(): void {
 		$body = $this->getHttpRequest()->getRawBody();
 		\assert($body !== null);
 		/** @var array<string, float|string> $data */
 		$data = \json_decode($body, true, flags: \JSON_THROW_ON_ERROR);
-		$newBookDto = new CreateBookDto(
+		$newTodoDto = new CreateTodoDto(
 			(string) $data['id'],
 			(string) $data['author'],
 			(string) $data['title'],
@@ -81,24 +81,24 @@ class BooksPresenter extends Presenter {
 			(float) $data['price'],
 			(string) $data['publish_date']
 		);
-		$book = $this->bookCrudService->createBook($newBookDto);
+		$todo = $this->todoCrudService->createTodo($newTodoDto);
 		$this->getHttpResponse()->setCode(IResponse::S201_Created);
-		$this->sendJson($book);
+		$this->sendJson($todo);
 	}
 
-	public function actionReadBook(string $bookId): void {
-		$bookId = new BookId($bookId);
-		$book = $this->bookCrudService->getBook($bookId);
-		$this->sendJson($book);
+	public function actionReadTodo(string $todoId): void {
+		$todoId = new TodoId($todoId);
+		$todo = $this->todoCrudService->getTodo($todoId);
+		$this->sendJson($todo);
 	}
 
-	public function actionUpdateBook(string $bookId): void {
-		$bookId = new BookId($bookId);
+	public function actionUpdateTodo(string $todoId): void {
+		$todoId = new TodoId($todoId);
 		$body = $this->getHttpRequest()->getRawBody();
 		\assert($body !== null);
 		/** @var array<string, float|string> $data */
 		$data = \json_decode($body, true, flags: \JSON_THROW_ON_ERROR);
-		$updateBookDto = new UpdateBookDto(
+		$updateTodoDto = new UpdateTodoDto(
 			(string) $data['author'],
 			(string) $data['title'],
 			(string) $data['genre'],
@@ -106,13 +106,13 @@ class BooksPresenter extends Presenter {
 			(float) $data['price'],
 			(string) $data['publish_date']
 		);
-		$book = $this->bookCrudService->updateBook($bookId, $updateBookDto);
-		$this->sendJson($book);
+		$todo = $this->todoCrudService->updateTodo($todoId, $updateTodoDto);
+		$this->sendJson($todo);
 	}
 
-	public function actionDeleteBook(string $bookId): void {
-		$bookId = new BookId($bookId);
-		$this->bookCrudService->deleteBook($bookId);
+	public function actionDeleteTodo(string $todoId): void {
+		$todoId = new TodoId($todoId);
+		$this->todoCrudService->deleteTodo($todoId);
 		$this->getHttpResponse()->setCode(IResponse::S204_NoContent);
 		$response = new TextResponse('');
 		$this->sendResponse($response);

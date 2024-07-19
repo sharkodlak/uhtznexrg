@@ -2,30 +2,30 @@
 
 declare(strict_types = 1);
 
-namespace App\BookModule\Repository;
+namespace App\TodoModule\Repository;
 
-use App\BookModule\Dto\CreateBookDto;
-use App\BookModule\Dto\UpdateBookDto;
-use App\BookModule\Entity\Book;
-use App\BookModule\ValueObject\Author;
-use App\BookModule\ValueObject\BookId;
+use App\TodoModule\Dto\CreateTodoDto;
+use App\TodoModule\Dto\UpdateTodoDto;
+use App\TodoModule\Entity\Todo;
+use App\TodoModule\ValueObject\Author;
+use App\TodoModule\ValueObject\TodoId;
 
-interface BookRepository {
-	public function create(CreateBookDto $newBookDto): Book;
+interface TodoRepository {
+	public function create(CreateTodoDto $newTodoDto): Todo;
 
-	public function delete(BookId $id): void;
+	public function delete(TodoId $id): void;
 
-	public function find(BookId $id): ?Book;
+	public function find(TodoId $id): ?Todo;
 
 	/**
-	 * @return array<Book>
+	 * @return array<Todo>
 	 */
 	public function listByAuthor(Author $author): array;
 
 	/**
-	 * @return array<Book>
+	 * @return array<Todo>
 	 */
 	public function findAll(): array;
 
-	public function update(BookId $id, UpdateBookDto $updateBookDto): Book;
+	public function update(TodoId $id, UpdateTodoDto $updateTodoDto): Todo;
 }

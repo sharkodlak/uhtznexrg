@@ -2,10 +2,10 @@
 
 declare(strict_types = 1);
 
-namespace App\BookModule\Command;
+namespace App\TodoModule\Command;
 
-use App\BookModule\Dto\CreateBookDto;
-use App\BookModule\Service\BookCrudService;
+use App\TodoModule\Dto\CreateTodoDto;
+use App\TodoModule\Service\TodoCrudService;
 use SimpleXMLElement;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -13,12 +13,12 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-#[AsCommand(name: 'app:book:import', description: 'Import a book from a XML file')]
+#[AsCommand(name: 'app:todo:import', description: 'Import a todo from a XML file')]
 class ImportCommand extends Command {
-	private const FILENAME = __DIR__ . '/../../../data/books.xml';
+	private const FILENAME = __DIR__ . '/../../../data/todos.xml';
 
 	public function __construct(
-		private BookCrudService $bookCrudService
+		private TodoCrudService $todoCrudService
 	) {
 		parent::__construct();
 	}
@@ -43,26 +43,26 @@ class ImportCommand extends Command {
 			return Command::FAILURE;
 		}
 
-		$output->writeln('Importing books from the XML file');
-		$this->importBooks($xml);
-		$output->writeln('Books imported successfully');
+		$output->writeln('Importing todos from the XML file');
+		$this->importTodos($xml);
+		$output->writeln('Todos imported successfully');
 
 		return Command::SUCCESS;
 	}
 
-	private function importBooks(SimpleXMLElement $xml): void {
-		foreach ($xml->book as $book) {
-			$newBookDto = new CreateBookDto(
-				(string) $book->attributes()->id,
-				(string) $book->author,
-				(string) $book->title,
-				(string) $book->genre,
-				(string) $book->description,
-				(float) $book->price,
+	private function importTodos(SimpleXMLElement $xml): void {
+		foreach ($xml->todo as $todo) {
+			$newTodoDto = new CreateTodoDto(
+				(string) $todo->attributes()->id,
+				(string) $todo->author,
+				(string) $todo->title,
+				(string) $todo->genre,
+				(string) $todo->description,
+				(float) $todo->price,
 				// phpcs:ignore Squiz.NamingConventions.ValidVariableName.MemberNotCamelCaps
-				(string) $book->publish_date
+				(string) $todo->publish_date
 			);
-			$this->bookCrudService->createBook($newBookDto);
+			$this->todoCrudService->createTodo($newTodoDto);
 		}
 	}
 }

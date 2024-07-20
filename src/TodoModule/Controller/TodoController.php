@@ -4,7 +4,14 @@ declare(strict_types = 1);
 
 namespace App\TodoModule\Controller;
 
+use App\TodoModule\Service\TodoCrudService;
+
 class TodoController {
+	public function __construct(
+		private readonly TodoCrudService $todoCrudService
+	) {
+	}
+
 	public function getAll(): void {
 		echo 'getAll';
 	}

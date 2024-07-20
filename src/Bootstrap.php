@@ -32,7 +32,7 @@ class Bootstrap {
 
 	public function createContainer(Application $application): Container {
 		$containerFactory = new ContainerFactory();
-		$container = $containerFactory->create();
+		$container = $containerFactory->create($this->config);
 		$application->setContainer($container);
 
 		return $container;

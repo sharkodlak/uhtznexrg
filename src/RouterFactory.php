@@ -11,14 +11,11 @@ class RouterFactory {
 	public function registerRoutes(RouteGroupInterface $root): void {
 		$root->group('/api', static function (RouteGroupInterface $api): void {
 			$api->group('/todos', static function (RouteGroupInterface $todos): void {
+				$todos->get('/{id}', TodoController::class . '::get');
+				$todos->put('/{id}', TodoController::class . '::update');
+				$todos->delete('/{id}', TodoController::class . '::delete');
 				$todos->get('', TodoController::class . '::getAll');
-
-				/*
-					$todos->post('', TodoController::class . ':create');
-					$todos->get('/{id}', TodoController::class . ':get');
-					$todos->put('/{id}', TodoController::class . ':update');
-					$todos->delete('/{id}', TodoController::class . ':delete');
-				*/
+				$todos->post('', TodoController::class . '::create');
 			});
 		});
 	}

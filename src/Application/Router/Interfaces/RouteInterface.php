@@ -15,5 +15,5 @@ interface RouteInterface {
 
 	public function getPath(): string;
 
-	public function execute(string $method): void;
+	public function execute(string $method, string ...$param): void;
 }

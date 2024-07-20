@@ -6,6 +6,7 @@ namespace App;
 
 use App\Application\Application;
 use App\Application\Config;
+use App\Application\DI\Container;
 use Symfony\Component\Dotenv\Dotenv;
 
 class Bootstrap {
@@ -23,15 +24,25 @@ class Bootstrap {
 
 	public function createApplication(): Application {
 		$application = new Application($this->config);
+		$this->createContainer($application);
 		$this->registerRoutes($application);
 
 		return $application;
 	}
 
+	public function createContainer(Application $application): Container {
+		$containerFactory = new ContainerFactory();
+		$container = $containerFactory->create();
+		$application->setContainer($container);
+
+		return $container;
+	}
+
 	public function registerRoutes(Application $application): void {
+		$container = $application->getContainer();
 		$router = $application->getRouter();
 		$root = $router->getRoot();
-		$routerFactory = new RouterFactory();
+		$routerFactory = new RouterFactory($container);
 		$routerFactory->registerRoutes($root);
 	}
 }

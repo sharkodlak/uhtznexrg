@@ -6,6 +6,7 @@ namespace App\TodoModule\Controller;
 
 use App\Application\Controller;
 use App\Application\Exceptions\ApplicationRuntimeException;
+use App\TodoModule\Exceptions\TodoNotDeleted;
 use App\TodoModule\Exceptions\TodoNotModified;
 use App\TodoModule\Factory\TodoWriteDtoFactory;
 use App\TodoModule\Service\TodoReadService;
@@ -70,7 +71,18 @@ class TodoController extends Controller {
 	}
 
 	public function delete(string $id): void {
-		echo 'delete(' . $id . ')';
+		try {
+			$todoId = TodoId::create($id);
+			$deleted = $this->todoWriteService->delete($todoId);
+
+			if (!$deleted) {
+				throw TodoNotDeleted::create();
+			}
+
+			\http_response_code(204);
+		} catch (Throwable $e) {
+			$this->handleException($e);
+		}
 	}
 
 	private function handleException(\Throwable $e): void {

@@ -18,11 +18,11 @@ class TodoWriteService {
 		return $this->todoRepository->create($newTodoDto);
 	}
 
-	public function delete(TodoId $id): void {
-		$this->todoRepository->delete($id);
+	public function delete(TodoId $id): bool {
+		return $this->todoRepository->delete($id);
 	}
 
-	public function update(TodoId $id, TodoWriteDto $todoWriteDto): void {
-		$this->todoRepository->update($id, $todoWriteDto);
+	public function update(TodoId $id, TodoWriteDto $todoWriteDto): bool {
+		return $this->todoRepository->update($id, $todoWriteDto);
 	}
 }

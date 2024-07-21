@@ -6,7 +6,7 @@ namespace App\TodoModule\Controller;
 
 use App\Application\Controller;
 use App\Application\Exceptions\ApplicationRuntimeException;
-use App\Exceptions\WrongInput;
+use App\TodoModule\Exceptions\TodoNotModified;
 use App\TodoModule\Factory\TodoWriteDtoFactory;
 use App\TodoModule\Service\TodoReadService;
 use App\TodoModule\Service\TodoWriteService;
@@ -29,18 +29,7 @@ class TodoController extends Controller {
 
 	public function create(): void {
 		try {
-			$json = \file_get_contents('php://input');
-			
-			if ($json === false) {
-				throw WrongInput::create('Invalid input. Expected an JSON object.');
-			}
-
-			$data = \json_decode($json, true);
-
-			if (!\is_array($data)) {
-				throw WrongInput::create('Invalid input. Expected an JSON object.');
-			}
-
+			$data = $this->getDataFromJsonBody();
 			$todoWriteDto = $this->todoWriteDtoFactory->create($data);
 			$todoId = $this->todoWriteService->create($todoWriteDto);
 			$data = [
@@ -64,7 +53,20 @@ class TodoController extends Controller {
 	}
 
 	public function update(string $id): void {
-		echo 'update(' . $id . ')';
+		try {
+			$todoId = TodoId::create($id);
+			$data = $this->getDataFromJsonBody();
+			$todoWriteDto = $this->todoWriteDtoFactory->create($data);
+			$modified = $this->todoWriteService->update($todoId, $todoWriteDto);
+
+			if (!$modified) {
+				throw TodoNotModified::create();
+			}
+
+			\http_response_code(204);
+		} catch (Throwable $e) {
+			$this->handleException($e);
+		}
 	}
 
 	public function delete(string $id): void {

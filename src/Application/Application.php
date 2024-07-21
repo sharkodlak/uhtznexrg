@@ -6,6 +6,7 @@ namespace App\Application;
 
 use App\Application\DI\Container;
 use App\Application\Router\Router;
+use Throwable;
 
 class Application {
 	private Container $container;
@@ -38,7 +39,13 @@ class Application {
 		$uri = $_SERVER['REQUEST_URI'];
 		// phpcs:ignore SlevomatCodingStandard.Variables.DisallowSuperGlobalVariable.DisallowedSuperGlobalVariable
 		$method = $_SERVER['REQUEST_METHOD'];
-		$this->getRouter()->dispatch($uri, $method);
+
+		try {
+			$this->getRouter()->dispatch($uri, $method);
+		} catch (Throwable $e) {
+			\http_response_code(500);
+			echo $e->getMessage();
+		}
 	}
 
 	public function setContainer(Container $container): void {

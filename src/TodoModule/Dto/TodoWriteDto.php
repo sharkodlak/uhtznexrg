@@ -4,13 +4,14 @@ declare(strict_types = 1);
 
 namespace App\TodoModule\Dto;
 
+use App\TodoModule\Enum\Status;
 use JsonSerializable;
 
-readonly class UpdateTodoDto implements JsonSerializable {
+readonly class TodoWriteDto implements JsonSerializable {
 	public function __construct(
 		private string $title,
 		private string $description,
-		private string $status
+		private Status $status
 	) {
 	}
 
@@ -22,7 +23,7 @@ readonly class UpdateTodoDto implements JsonSerializable {
 		return $this->description;
 	}
 
-	public function getStatus(): string {
+	public function getStatus(): Status {
 		return $this->status;
 	}
 
@@ -37,7 +38,7 @@ readonly class UpdateTodoDto implements JsonSerializable {
 		return [
 			'title' => $this->title,
 			'description' => $this->description,
-			'status' => $this->status,
+			'status' => $this->status->value,
 		];
 	}
 }

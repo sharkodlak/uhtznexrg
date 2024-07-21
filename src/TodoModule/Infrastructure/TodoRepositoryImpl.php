@@ -4,8 +4,7 @@ declare(strict_types = 1);
 
 namespace App\TodoModule\Infrastructure;
 
-use App\TodoModule\Dto\CreateTodoDto;
-use App\TodoModule\Dto\UpdateTodoDto;
+use App\TodoModule\Dto\TodoWriteDto;
 use App\TodoModule\Entity\Todo;
 use App\TodoModule\Exceptions\TodoCreateException;
 use App\TodoModule\Exceptions\TodoRuntimeException;
@@ -34,33 +33,28 @@ readonly class TodoRepositoryImpl implements TodoRepository {
 	) {
 	}
 
-	public function create(CreateTodoDto $newTodoDto): Todo {
+	public function create(TodoWriteDto $todoWriteDto): TodoId {
 		$stmt = $this->pdo->prepare(self::INSERT);
-		$stmt->execute($newTodoDto->toArray());
+		$stmt->execute($todoWriteDto->toArray());
 		$todoId = $stmt->fetchColumn();
 
 		if ($todoId === false || $stmt->rowCount() === 0) {
 			throw TodoCreateException::create('Could not create todo');
 		}
 
-		$todoIdVO = new TodoId((int) $todoId);
-		$todo = $this->find($todoIdVO);
-
-		if ($todo === null) {
-			throw TodoCreateException::create('Could not create todo');
-		}
-
-		return $todo;
+		return new TodoId((int) $todoId);
 	}
 
-	public function delete(TodoId $id): void {
+	public function delete(TodoId $id): bool {
 		$stmt = $this->pdo->prepare(self::DELETE);
-		$stmt->execute(['id' => $id->getValue()]);
+		$stmt->execute([ 'id' => $id->getValue() ]);
+
+		return $stmt->rowCount() > 0;
 	}
 
 	public function find(TodoId $id): ?Todo {
 		$stmt = $this->pdo->prepare(self::SELECT . ' WHERE todo_id = :id');
-		$stmt->execute(['id' => $id->getValue()]);
+		$stmt->execute([ 'id' => $id->getValue() ]);
 
 		return $this->fetch($stmt);
 	}
@@ -80,18 +74,13 @@ readonly class TodoRepositoryImpl implements TodoRepository {
 		return $todos;
 	}
 
-	public function update(TodoId $id, UpdateTodoDto $updateTodoDto): Todo {
-		$data = $updateTodoDto->toArray();
+	public function update(TodoId $id, TodoWriteDto $todoWriteDto): bool {
+		$data = $todoWriteDto->toArray();
 		$data['id'] = $id->getValue();
 		$stmt = $this->pdo->prepare(self::UPDATE);
 		$stmt->execute($data);
 
-		return $this->getTodoInstance(
-			$id->getValue(),
-			$updateTodoDto->getTitle(),
-			$updateTodoDto->getDescription(),
-			$updateTodoDto->getStatus()
-		);
+		return $stmt->rowCount() > 0;
 	}
 
 	private function fetch(PDOStatement $stmt): ?Todo {

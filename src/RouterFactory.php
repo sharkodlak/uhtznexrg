@@ -19,11 +19,11 @@ class RouterFactory {
 			$api->group('/todos', function (RouteGroupInterface $todos): void {
 				$todoController = $this->container->get(TodoController::class);
 
-				$todos->get('/{id}', [$todoController, 'get']);
-				$todos->put('/{id}', [$todoController, 'update']);
-				$todos->delete('/{id}', [$todoController, 'delete']);
-				$todos->get('', [$todoController, 'getAll']);
-				$todos->post('', [$todoController, 'create']);
+				$todos->get('/{id}', [ $todoController, 'get' ]);
+				$todos->put('/{id}', [ $todoController, 'update' ]);
+				$todos->delete('/{id}', [ $todoController, 'delete' ]);
+				$todos->get('', [ $todoController, 'getAll' ]);
+				$todos->post('', [ $todoController, 'create' ]);
 			});
 		});
 	}

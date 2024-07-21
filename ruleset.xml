@@ -22,6 +22,7 @@
 		<exclude name="Generic.Formatting.SpaceBeforeCast.NoSpace"/>
 		<exclude name="Generic.Functions.OpeningFunctionBraceBsdAllman.BraceOnSameLine"/>
 		<exclude name="Generic.Functions.OpeningFunctionBraceBsdAllman.BraceSpacing"/>
+		<exclude name="Generic.NamingConventions.AbstractClassNamePrefix.Missing"/>
 		<exclude name="Generic.NamingConventions.InterfaceNameSuffix.Missing"/>
 		<exclude name="Generic.PHP.ClosingPHPTag.NotFound"/>
 		<exclude name="Generic.PHP.RequireStrictTypes.MissingDeclaration"/>
@@ -74,6 +75,7 @@
 		<exclude name="Squiz.Commenting.FunctionComment.ParamNameNoMatch"/>
 		<exclude name="Squiz.Commenting.FunctionCommentThrowTag.Missing"/>
 		<exclude name="Squiz.Commenting.InlineComment.DocBlock"/>
+		<exclude name="Squiz.Commenting.LongConditionClosingComment.Missing"/>
 		<exclude name="Squiz.Commenting.PostStatementComment.Found"/>
 		<exclude name="Squiz.Commenting.VariableComment.Missing"/>
 		<exclude name="Squiz.ControlStructures.InlineIfDeclaration.NoBrackets"/>
@@ -135,6 +137,11 @@
 		<exclude name="SlevomatCodingStandard.Numbers.DisallowNumericLiteralSeparator.DisallowedNumericLiteralSeparator"/>
 		<exclude name="SlevomatCodingStandard.Operators.DisallowIncrementAndDecrementOperators.DisallowedPreIncrementOperator"/>
 		<exclude name="SlevomatCodingStandard.PHP.RequireExplicitAssertion.RequiredExplicitAssertion"/>
+	</rule>
+	<rule ref="SlevomatCodingStandard.Arrays.SingleLineArrayWhitespace">
+		<properties>
+			<property name="spacesAroundBrackets" value="1"/>
+		</properties>
 	</rule>
 	<rule ref="SlevomatCodingStandard.Attributes.AttributesOrder">
 		<properties>

@@ -66,7 +66,7 @@ readonly class TodoRepositoryImpl implements TodoRepository {
 		$stmt = $this->pdo->query(self::SELECT);
 
 		if ($stmt === false) {
-			throw new TodoRuntimeException('Failed to fetch todos');
+			throw new TodoRuntimeException('Failed to fetch To-Dos.');
 		}
 
 		$todos = $stmt->fetchAll(PDO::FETCH_FUNC, fn (...$args) => $this->getTodoInstance(...$args));
@@ -85,10 +85,13 @@ readonly class TodoRepositoryImpl implements TodoRepository {
 
 	private function fetch(PDOStatement $stmt): ?Todo {
 		$row = $stmt->fetch(PDO::FETCH_ASSOC);
-		\assert(\is_array($row) || $row === false, 'Unexpected fetch result');
 
 		if ($row === false) {
 			return null;
+		}
+
+		if (!\is_array($row)) {
+			throw new TodoRuntimeException('Failed to fetch To-Do.');
 		}
 
 		return $this->getTodoInstance($row['todo_id'], $row['title'], $row['description'], $row['status']);

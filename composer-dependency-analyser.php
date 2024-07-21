@@ -8,5 +8,5 @@ use ShipMonk\ComposerDependencyAnalyser\Config\ErrorType;
 $config = new Configuration();
 
 return $config
-	->ignoreErrorsOnPackage('aura/sql', [ErrorType::UNUSED_DEPENDENCY])
+	//->ignoreErrorsOnPackage('aura/sql', [ErrorType::UNUSED_DEPENDENCY])
 ;

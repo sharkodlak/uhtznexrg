@@ -23,9 +23,13 @@ class TodoController extends Controller {
 	}
 
 	public function getAll(): void {
-		$todos = $this->todoReadService->getAll();
-		$data = [ 'todos' => $todos ];
-		$this->sendJsonResponse($data);
+		try {
+			$todos = $this->todoReadService->getAll();
+			$data = [ 'todos' => $todos ];
+			$this->sendJsonResponse($data);
+		} catch (Throwable $e) {
+			$this->handleException($e);
+		}
 	}
 
 	public function create(): void {

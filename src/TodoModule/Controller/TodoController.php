@@ -10,6 +10,7 @@ use App\Exceptions\WrongInput;
 use App\TodoModule\Factory\TodoWriteDtoFactory;
 use App\TodoModule\Service\TodoReadService;
 use App\TodoModule\Service\TodoWriteService;
+use App\TodoModule\ValueObject\TodoId;
 use Throwable;
 
 class TodoController extends Controller {
@@ -53,7 +54,13 @@ class TodoController extends Controller {
 	}
 
 	public function get(string $id): void {
-		echo 'get(' . $id . ')';
+		try {
+			$todoId = TodoId::create($id);
+			$todo = $this->todoReadService->get($todoId);
+			$this->sendJsonResponse($todo);
+		} catch (Throwable $e) {
+			$this->handleException($e);
+		}
 	}
 
 	public function update(string $id): void {

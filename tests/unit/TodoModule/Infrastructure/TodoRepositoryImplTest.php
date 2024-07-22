@@ -84,7 +84,11 @@ class TodoRepositoryImplTest extends TestCase {
 			->method('execute')
 			->with([ 'id' => $todoId->getValue() ])
 			->willReturn(true);
-		$this->todoRepository->delete($todoId);
+		$this->stmt->expects(self::once())
+			->method('rowCount')
+			->willReturn(1);
+		$deleted = $this->todoRepository->delete($todoId);
+		self::assertTrue($deleted);
 	}
 
 	// phpcs:ignore SlevomatCodingStandard.Functions.FunctionLength.FunctionLength
@@ -133,7 +137,21 @@ class TodoRepositoryImplTest extends TestCase {
 	}
 
 	public function testUpdate(): void {
-		$this->markTestIncomplete('This test has not been implemented yet.');
+		$row = self::ROWS[0];
+		$todoId = new TodoId(\array_shift($row));
+		$this->pdo->expects(self::once())
+			->method('prepare')
+			->willReturn($this->stmt);
+		$this->stmt->expects(self::once())
+			->method('execute')
+			->willReturn(true);
+		$this->stmt->expects(self::once())
+			->method('rowCount')
+			->willReturn(1);
+		$status = StatusEnum::from($row['status']);
+		$todoWriteDto = new TodoWriteDto($row['title'], $row['description'], $status);
+		$updated = $this->todoRepository->update($todoId, $todoWriteDto);
+		self::assertTrue($updated);
 	}
 
 	private function todoProvider(int $todoId, string $title, string $description, string $status): Todo&MockObject {

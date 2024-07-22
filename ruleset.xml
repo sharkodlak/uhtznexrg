@@ -27,7 +27,8 @@
 		<exclude name="Generic.PHP.ClosingPHPTag.NotFound"/>
 		<exclude name="Generic.PHP.RequireStrictTypes.MissingDeclaration"/>
 		<exclude name="Generic.PHP.UpperCaseConstant.Found"/>
-        <exclude name="Generic.WhiteSpace.DisallowTabIndent.TabsUsed" />
+		<exclude name="Generic.Strings.UnnecessaryStringConcat.Found"/>
+		<exclude name="Generic.WhiteSpace.DisallowTabIndent.TabsUsed"/>
 	</rule>
 	<rule ref="Generic.Formatting.SpaceAfterNot">
 		<properties>

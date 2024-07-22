@@ -5,9 +5,14 @@ declare(strict_types = 1);
 namespace Tests\Unit\TodoModule\Infrastructure;
 
 use App\TodoModule\Dto\TodoWriteDto;
-use App\TodoModule\Enum\Status;
+use App\TodoModule\Entity\Todo;
+use App\TodoModule\Enum\Status as StatusEnum;
+use App\TodoModule\Factory\TodoFactory;
 use App\TodoModule\Infrastructure\TodoRepositoryImpl;
 use App\TodoModule\Repository\TodoRepository;
+use App\TodoModule\ValueObject\Description;
+use App\TodoModule\ValueObject\Status;
+use App\TodoModule\ValueObject\Title;
 use App\TodoModule\ValueObject\TodoId;
 use PDO;
 use PDOStatement;
@@ -38,12 +43,15 @@ class TodoRepositoryImplTest extends TestCase {
 
 	private PDOStatement&MockObject $stmt;
 
+	private TodoFactory&MockObject $todoFactory;
+
 	private TodoRepository $todoRepository;
 
 	public function setUp(): void {
 		$this->pdo = $this->createMock(PDO::class);
 		$this->stmt = $this->createMock(PDOStatement::class);
-		$this->todoRepository = new TodoRepositoryImpl($this->pdo);
+		$this->todoFactory = $this->createMock(TodoFactory::class);
+		$this->todoRepository = new TodoRepositoryImpl($this->pdo, $this->todoFactory);
 	}
 
 	public function testCreate(): void {
@@ -61,7 +69,7 @@ class TodoRepositoryImplTest extends TestCase {
 		$this->stmt->expects(self::once())
 			->method('rowCount')
 			->willReturn(1);
-		$status = Status::from($row['status']);
+		$status = StatusEnum::from($row['status']);
 		$todoWriteDto = new TodoWriteDto($row['title'], $row['description'], $status);
 		$todoId = $this->todoRepository->create($todoWriteDto);
 		self::assertSame($id, $todoId->getValue());
@@ -79,6 +87,7 @@ class TodoRepositoryImplTest extends TestCase {
 		$this->todoRepository->delete($todoId);
 	}
 
+	// phpcs:ignore SlevomatCodingStandard.Functions.FunctionLength.FunctionLength
 	public function testFind(): void {
 		$row = self::ROWS[0];
 		$todoId = new TodoId($row['todo_id']);
@@ -92,18 +101,55 @@ class TodoRepositoryImplTest extends TestCase {
 		$this->stmt->expects(self::once())
 			->method('fetch')
 			->willReturn($row);
+		$this->todoFactory->expects(self::once())
+			->method('create')
+			->with(...$row)
+			->willReturnCallback(
+				fn ($todoId, $title, $description, $status): Todo => $this->todoProvider(
+					$todoId,
+					$title,
+					$description,
+					$status
+				)
+			);
 		$todo = $this->todoRepository->find($todoId);
-		self::assertSame($todo?->getId()->getValue(), $todoId->getValue());
-		self::assertSame($todo?->getTitle()->getValue(), $row['title']);
-		self::assertSame($todo?->getDescription()->getValue(), $row['description']);
-		self::assertSame($todo?->getStatus()->getValue(), $row['status']);
+		self::assertNotNull($todo);
+		self::assertSame($todo->getId()->getValue(), $todoId->getValue());
+		self::assertSame($todo->getTitle()->getValue(), $row['title']);
+		self::assertSame($todo->getDescription()->getValue(), $row['description']);
+		self::assertSame($todo->getStatus()->getValue(), $row['status']);
 	}
 
 	public function testFinAll(): void {
-		$this->markTestIncomplete('This test has not been implemented yet.');
+		$this->pdo->expects(self::once())
+			->method('query')
+			->willReturn($this->stmt);
+		$this->stmt->expects(self::once())
+			->method('fetchAll')
+			->willReturn(self::ROWS);
+		$this->todoFactory->expects(self::exactly(\count(self::ROWS)))
+			->method('create');
+		$this->todoRepository->findAll();
 	}
 
 	public function testUpdate(): void {
 		$this->markTestIncomplete('This test has not been implemented yet.');
+	}
+
+	private function todoProvider(int $todoId, string $title, string $description, string $status): Todo&MockObject {
+		$todo = $this->createMock(Todo::class);
+		$todo->expects(self::once())
+			->method('getId')
+			->willReturn(new TodoId($todoId));
+		$todo->expects(self::once())
+			->method('getTitle')
+			->willReturn(new Title($title));
+		$todo->expects(self::once())
+			->method('getDescription')
+			->willReturn(new Description($description));
+		$todo->expects(self::once())
+			->method('getStatus')
+			->willReturn(new Status($status));
+		return $todo;
 	}
 }

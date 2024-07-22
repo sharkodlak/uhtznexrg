@@ -9,6 +9,7 @@ use App\Application\DI\Container;
 use App\Application\JsonHelper;
 use App\Application\Router\Router;
 use App\TodoModule\Controller\TodoController;
+use App\TodoModule\Factory\TodoFactory;
 use App\TodoModule\Factory\TodoWriteDtoFactory;
 use App\TodoModule\Infrastructure\TodoRepositoryImpl;
 use App\TodoModule\Repository\TodoRepository;
@@ -35,7 +36,10 @@ class ContainerFactory {
 		$pdo = new ExtendedPdo($dsn, $config->getDbUser(), $config->getDbPass());
 		$container->set($pdo, PDO::class);
 
-		$todoRepository = new TodoRepositoryImpl($pdo);
+		$todoFactory = new TodoFactory();
+		$container->set($todoFactory);
+
+		$todoRepository = new TodoRepositoryImpl($pdo, $todoFactory);
 		$container->set($todoRepository, TodoRepository::class);
 
 		$todoReadService = new TodoReadService($todoRepository);

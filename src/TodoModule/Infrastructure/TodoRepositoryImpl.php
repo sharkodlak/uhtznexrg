@@ -8,10 +8,8 @@ use App\TodoModule\Dto\TodoWriteDto;
 use App\TodoModule\Entity\Todo;
 use App\TodoModule\Exceptions\TodoCreateException;
 use App\TodoModule\Exceptions\TodoRuntimeException;
+use App\TodoModule\Factory\TodoFactory;
 use App\TodoModule\Repository\TodoRepository;
-use App\TodoModule\ValueObject\Description;
-use App\TodoModule\ValueObject\Status;
-use App\TodoModule\ValueObject\Title;
 use App\TodoModule\ValueObject\TodoId;
 use PDO;
 use PDOStatement;
@@ -29,7 +27,8 @@ readonly class TodoRepositoryImpl implements TodoRepository {
 	private const DELETE = 'DELETE FROM todos WHERE todo_id = :id';
 
 	public function __construct(
-		private PDO $pdo
+		private PDO $pdo,
+		private TodoFactory $todoFactory
 	) {
 	}
 
@@ -69,7 +68,8 @@ readonly class TodoRepositoryImpl implements TodoRepository {
 			throw new TodoRuntimeException('Failed to fetch To-Dos.');
 		}
 
-		$todos = $stmt->fetchAll(PDO::FETCH_FUNC, fn (...$args) => $this->getTodoInstance(...$args));
+		$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+		$todos = \array_map(fn (array $row): Todo => $this->todoFactory->create(...\array_values($row)), $rows);
 
 		return $todos;
 	}
@@ -94,20 +94,6 @@ readonly class TodoRepositoryImpl implements TodoRepository {
 			throw new TodoRuntimeException('Failed to fetch To-Do.');
 		}
 
-		return $this->getTodoInstance($row['todo_id'], $row['title'], $row['description'], $row['status']);
-	}
-
-	private function getTodoInstance(
-		int $todoId,
-		string $title,
-		string $description,
-		string $status
-	): Todo {
-		$todoIdVO = new TodoId($todoId);
-		$titleVO = new Title($title);
-		$descriptionVO = new Description($description);
-		$statusVO = new Status($status);
-
-		return new Todo($todoIdVO, $titleVO, $descriptionVO, $statusVO);
+		return $this->todoFactory->create($row['todo_id'], $row['title'], $row['description'], $row['status']);
 	}
 }

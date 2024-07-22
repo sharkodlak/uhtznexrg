@@ -9,6 +9,5 @@ class JsonHelper {
 		$json = \json_encode($data, \JSON_THROW_ON_ERROR);
 		\header('Content-Type: application/json');
 		echo $json;
-		exit;
 	}
 }

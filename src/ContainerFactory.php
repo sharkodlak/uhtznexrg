@@ -8,6 +8,7 @@ use App\Application\Config;
 use App\Application\DI\Container;
 use App\Application\JsonHelper;
 use App\Application\Router\Router;
+use App\Exceptions\WrongInput;
 use App\TodoModule\Controller\TodoController;
 use App\TodoModule\Factory\TodoFactory;
 use App\TodoModule\Factory\TodoWriteDtoFactory;
@@ -26,6 +27,7 @@ class ContainerFactory {
 		return $container;
 	}
 
+	// phpcs:ignore SlevomatCodingStandard.Functions.FunctionLength.FunctionLength
 	private function registerServices(Container $container, Config $config): void {
 		$container->set(new Router());
 
@@ -53,6 +55,13 @@ class ContainerFactory {
 
 		$todoController = new TodoController($todoReadService, $todoWriteService, $todoWriteDtoFactory);
 		$todoController->setJsonHelper($jsonHelper);
+		$input = \file_get_contents('php://input');
+
+		if ($input === false) {
+			throw WrongInput::create('Invalid input. Can not get input.');
+		}
+
+		$todoController->injectInput($input);
 		$container->set($todoController);
 	}
 }

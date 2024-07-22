@@ -33,6 +33,7 @@
     },
     "autoload-dev": {
         "psr-4": {
+            "Tests\\Functional\\": "tests/functional/",
             "Tests\\Integration\\": "tests/integration/",
             "Tests\\Unit\\": "tests/unit/"
         }
@@ -48,10 +49,11 @@
         "cmd:require": "@php vendor/bin/composer-dependency-analyser",
         "cmd:tests": [
             "@cmd:tests:unit",
-            "@cmd:tests:integration"
+            "@cmd:tests:functional"
         ],
         "cmd:tests:unit": "@php vendor/bin/phpunit --testsuite Unit",
         "cmd:tests:integration": "@php vendor/bin/phpunit --testsuite Integration",
+        "cmd:tests:functional": "@php vendor/bin/phpunit --testsuite Functional",
         "cmd:qa": [
             "@cmd:lint",
             "@cmd:phpcs",

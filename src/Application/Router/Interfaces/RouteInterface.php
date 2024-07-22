@@ -11,9 +11,9 @@ interface RouteInterface {
 	public const PUT = 'PUT';
 	public const DELETE = 'DELETE';
 
-	public function dispatch(string $uri, string $method): void;
+	public function dispatch(string $uri, string $method): bool;
 
 	public function getPath(): string;
 
-	public function execute(string $method, string ...$param): void;
+	public function execute(string $method, string ...$param): bool;
 }

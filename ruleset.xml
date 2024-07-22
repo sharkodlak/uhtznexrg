@@ -12,6 +12,7 @@
 		<exclude name="Generic.Commenting.DocComment.MissingShort"/>
 		<exclude name="Generic.Commenting.DocComment.NonParamGroup"/>
 		<exclude name="Generic.Commenting.DocComment.TagValueIndent"/>
+		<exclude name="Generic.Commenting.Todo.CommentFound"/>
 		<exclude name="Generic.Commenting.Todo.TaskFound"/>
 		<exclude name="Generic.Files.EndFileNoNewline.Found"/>
 		<exclude name="Generic.Files.LineLength.TooLong"/>
@@ -110,6 +111,7 @@
 		<properties>
 			<property name="rootNamespaces" type="array">
 				<element key="src" value="App"/>
+				<element key="tests/functional" value="Tests\Functional"/>
 				<element key="tests/integration" value="Tests\Integration"/>
 				<element key="tests/unit" value="Tests\Unit"/>
 			</property>

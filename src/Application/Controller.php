@@ -9,6 +9,12 @@ use App\Exceptions\WrongInput;
 abstract class Controller {
 	private JsonHelper $jsonHelper;
 
+	private string $input;
+
+	public function injectInput(string $input): void {
+		$this->input = $input;
+	}
+
 	public function sendJsonResponse(mixed $data): void {
 		$this->jsonHelper->sendResponse($data);
 	}
@@ -21,12 +27,7 @@ abstract class Controller {
 	 * @return array<string, string>
 	 */
 	protected function getDataFromJsonBody(): array {
-		$json = \file_get_contents('php://input');
-
-		if ($json === false) {
-			throw WrongInput::create('Invalid input. Expected an JSON object.');
-		}
-
+		$json = $this->input;
 		$data = \json_decode($json, true);
 
 		if (!\is_array($data)) {

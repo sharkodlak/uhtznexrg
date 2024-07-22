@@ -11,7 +11,7 @@ trait DispatchTrait {
 	/** @var array<string, string> $params */
 	private array $params;
 
-	public function dispatch(string $uri, string $method): void {
+	public function dispatch(string $uri, string $method): bool {
 		$pathParts = \explode('/', $this->getPath());
 		$uriParts = \explode('/', $uri);
 		$match = true;
@@ -32,7 +32,7 @@ trait DispatchTrait {
 		}
 
 		if (!$match) {
-			return;
+			return false;
 		}
 
 		$rest = '/' . \implode('/', $uriParts);
@@ -40,12 +40,22 @@ trait DispatchTrait {
 		if ($this instanceof RouteInterface) {
 			$namedParams = $this->getParams();
 			$params = array_values($namedParams);
-			$this->execute($method, ...$params);
+			$executed = $this->execute($method, ...$params);
+
+			if ($executed) {
+				return true;
+			}
 		} else {
 			foreach ($this->getRoutes() as $route) {
-				$route->dispatch($rest, $method);
+				$executed = $route->dispatch($rest, $method);
+
+				if ($executed) {
+					return true;
+				}
 			}
 		}
+
+		return false;
 	}
 
 	/**

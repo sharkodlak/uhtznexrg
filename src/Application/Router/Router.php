@@ -11,10 +11,10 @@ class Router {
 		$this->root = new RootRoute();
 	}
 
-	public function dispatch(string $uri, string $method): void {
+	public function dispatch(string $uri, string $method): bool {
 		$uriPath = \parse_url($uri, \PHP_URL_PATH);
 		\assert(\is_string($uriPath));
-		$this->root->dispatch($uriPath, $method);
+		return $this->root->dispatch($uriPath, $method);
 	}
 
 	public function getRoot(): RootRoute {

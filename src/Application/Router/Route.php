@@ -25,10 +25,12 @@ class Route implements RouteInterface {
 		return $this->path;
 	}
 
-	public function execute(string $method, string ...$params): void {
+	public function execute(string $method, string ...$params): bool {
 		if ($this->method === $method) {
 			($this->callback)(...$params);
-			exit;
+			return true;
 		}
+
+		return false;
 	}
 }

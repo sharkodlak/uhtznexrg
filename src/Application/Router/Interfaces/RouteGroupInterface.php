@@ -18,7 +18,7 @@ interface RouteGroupInterface {
 
 	public function delete(string $path, callable $callback): self;
 
-	public function dispatch(string $uri, string $method): void;
+	public function dispatch(string $uri, string $method): bool;
 
 	public function getPath(): string;
 }

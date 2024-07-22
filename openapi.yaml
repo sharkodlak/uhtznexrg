@@ -1,34 +1,50 @@
 openapi: 3.0.3
 
 info:
-  title: Owl
+  title: HUGmarket
   version: 1.0.0
 
 tags:
-  - name: User
+  - name: To-Do
 
 paths:
-  /api/v{apiVersion}/user:
-    parameters:
-      - $ref: '#/components/parameters/apiVersion'
-    post:
-      summary: Create new user.
-      operationId: createUser
+  /api/todos:
+    get:
+      summary: Get To-Do list.
+      operationId: getTodos
       tags:
-        - User
+        - To-Do
+      responses:
+        '200':
+          description: To-Do list.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TodoList'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '4XX':
+          $ref: '#/components/responses/ClientError'
+        '5XX':
+          $ref: '#/components/responses/Error'
+    post:
+      summary: Create new To-Do.
+      operationId: createTodo
+      tags:
+        - To-Do
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserCreateDto'
+              $ref: '#/components/schemas/TodoWriteDto'
         required: true
       responses:
         '201':
-          description: User successfully created.
+          description: To-Do successfully created.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserCreateDto'
+                $ref: '#/components/schemas/CreatedId'
         '400':
           $ref: '#/components/responses/InvalidRequest'
         '4XX':
@@ -36,22 +52,55 @@ paths:
         '5XX':
           $ref: '#/components/responses/Error'
 
-  /api/v{apiVersion}/user/{userId}:
+  /api/todos/{todoId}:
     parameters:
-      - $ref: '#/components/parameters/apiVersion'
-      - $ref: '#/components/parameters/userId'
+      - $ref: '#/components/parameters/todoId'
     get:
-      summary: Get user.
-      operationId: getUser
+      summary: Get To-Do.
+      operationId: getTodo
       tags:
-        - User
+        - To-Do
       responses:
         '200':
-          description: User data.
+          description: To-Do data.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: '#/components/schemas/Todo'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '4XX':
+          $ref: '#/components/responses/ClientError'
+        '5XX':
+          $ref: '#/components/responses/Error'
+    put:
+      summary: Update To-Do.
+      operationId: updateTodo
+      tags:
+        - To-Do
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TodoWriteDto'
+        required: true
+      responses:
+        '204':
+          description: To-Do successfully updated.
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '4XX':
+          $ref: '#/components/responses/ClientError'
+        '5XX':
+          $ref: '#/components/responses/Error'
+    delete:
+      summary: Delete To-Do.
+      operationId: deleteTodo
+      tags:
+        - To-Do
+      responses:
+        '204':
+          description: To-Do successfully deleted.
         '400':
           $ref: '#/components/responses/InvalidRequest'
         '4XX':
@@ -59,64 +108,16 @@ paths:
         '5XX':
           $ref: '#/components/responses/Error'
 
-  /api/v{apiVersion}/user/check:
-    parameters:
-      - $ref: '#/components/parameters/apiVersion'
-    get:
-      summary: Check if username or email exists.
-      operationId: checkUser
-      tags:
-        - User
-      parameters:
-        - $ref: '#/components/parameters/email'
-        - $ref: '#/components/parameters/username'
-      responses:
-        '200':
-          description: Checked property is available.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserCheck'
-        '400':
-          $ref: '#/components/responses/InvalidRequest'
-        '4XX':
-          $ref: '#/components/responses/ClientError'
-        '5XX':
-          $ref: '#/components/responses/Error'
 
 components:
   parameters:
-    apiVersion:
-      name: apiVersion
-      description: The API version.
+    todoId:
+      name: todoId
+      description: The To-Do ID.
       in: path
       required: true
       schema:
-        type: integer
-        minimum: 1
-        maximum: 2
-        default: 1
-    email:
-      name: email
-      description: The user's email.
-      in: query
-      required: false
-      schema:
-        $ref: '#/components/schemas/email'
-    userId:
-      name: userId
-      description: The user ID.
-      in: path
-      required: true
-      schema:
-        $ref: '#/components/schemas/userId'
-    username:
-      name: username
-      description: The user's username.
-      in: query
-      required: false
-      schema:
-        $ref: '#/components/schemas/username'
+        $ref: '#/components/schemas/todoId'
 
   responses:
     ClientError:
@@ -148,95 +149,70 @@ components:
         error:
           type: string
           description: A message describing the error.
-        messages:
-          type: array
-          items:
-            type: string
-            description: A detailed description of the error.
-        extra:
-          type: object
-          description: Additional information about the error.
-        trace:
-          type: array
-          items:
-            type: object
-            description: A stack trace of the error.
       required:
         - error
     InvalidRequest:
-      type: object
-      properties:
-        message:
-          type: string
-          description: Human readable description of the error
-        validation:
-          type: object
-          description: A detailed description of the error.
-      required:
-        - message
-        - validation
-    User:
+      allOf:
+        - $ref: "#/components/schemas/Error"
+
+    CreatedId:
       type: object
       properties:
         id:
-          $ref: '#/components/schemas/userId'
-          readonly: true
-        email:
-          $ref: '#/components/schemas/email'
-        username:
-          $ref: '#/components/schemas/username'
-      additionalProperties: false
-    UserCheck:
-      type: object
-      properties:
-        email:
-          type: string
-          description: Email is available.
-          enum:
-            - available
-            - used
-        username:
-          type: string
-          description: Username is available.
-          enum:
-            - available
-            - used
-      additionalProperties: false
-      anyOf:
-        - required:
-          - email
-        - required:
-          - username
-    UserCreateDto:
-      type: object
-      properties:
-        email:
-          $ref: '#/components/schemas/email'
-        username:
-          $ref: '#/components/schemas/username'
+          $ref: '#/components/schemas/todoId'
       required:
-        - email
-        - username
+        - id
       additionalProperties: false
-    email:
-      type: string
-      format: email
-      description: The user's email.
-    userId:
-      type: string
-      format: uuid
-      description: Unique identifier of the user.
-    username:
-      type: string
-      format: username
-      description: The user's username.
+    Todo:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/todoId'
+          readonly: true
+        title:
+          $ref: '#/components/schemas/title'
+        description:
+          $ref: '#/components/schemas/description'
+        status:
+          $ref: '#/components/schemas/status'
+      additionalProperties: false
+    TodoList:
+      type: object
+      properties:
+        todos:
+          type: array
+          items:
+            $ref: '#/components/schemas/Todo'
+    TodoWriteDto:
+      type: object
+      properties:
+        title:
+          $ref: '#/components/schemas/title'
+        description:
+          $ref: '#/components/schemas/description'
+        status:
+          $ref: '#/components/schemas/status'
+      required:
+        - title
+        - description
+        - status
+      additionalProperties: false
 
-  securitySchemes:
-    Bearer:
-      type: apiKey
-      description: 'JWT authorization HTTP header using the Bearer scheme. Example: "Bearer {token}"'
-      name: Authorization
-      in: header
+    description:
+      type: string
+      description: The To-Do's description.
+    status:
+      type: string
+      description: The To-Do's status.
+      enum:
+        - pending
+        - completed
+    title:
+      type: string
+      description: The To-Do's title.
+    todoId:
+      type: integer
+      description: Unique identifier of the To-Do.
 
 servers:
     - url: /
